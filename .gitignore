@@ -1,0 +1,10 @@
+*~
+*.exe
+*#*
+*.ilk
+*.obj
+*.pdb
+*.rdi
+*.sh
+.cache/*
+*compile_commands.json*
