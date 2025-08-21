@@ -321,9 +321,9 @@ L5:
             //
 
             mov     ecx,eax         // save a copy of quotient in ECX
-            mul     dword ptr CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR)
+            mul     CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR)
             xchg    ecx,eax         // save product, get quotient in EAX
-            mul     dword ptr CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR)
+            mul     CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR)
             add     edx,ecx         // EDX:EAX = QUOT * CUSTOM_CRT_DVSR
             jc      short L6        // carry means Quotient is off by 1
 
