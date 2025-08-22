@@ -18,7 +18,7 @@ rem Stack Guards (security cookies) disabled
 rem Stack Probes disabled by forcing their inclusion only when function's local variables require more than 9999999 bytes.
 set SPECIAL_COMPILER_OPTIONS=/GS- /Gs9999999
 rem Stack immediatelly reserved and commited (1MB).
-set SPECIAL_LINKED_OPTIONS=-stack:0x100000,0x100000
+set SPECIAL_LINKER_OPTIONS=-stack:0x100000,0x100000
 
 set LIBRARIES=kernel32.lib
 
