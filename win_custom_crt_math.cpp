@@ -65,7 +65,8 @@ extern "C" {
             sbb     eax,0
             mov     CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVND),eax // save positive value
             mov     CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVND),edx
-L1:
+
+            L1:
             mov     eax,CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR) // hi word of b
             or      eax,eax         // test to see if signed
             jge     short L2        // skip rest if b is already positive
@@ -76,8 +77,8 @@ L1:
             sbb     eax,0
             mov     CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR),eax // save positive value
             mov     CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR),edx
-L2:
 
+            L2:
             // Now do the divide.  First look to see if the divisor is less than 4194304K.
             // If so, then we can use a simple algorithm with word divides, otherwise
             // things get a little more complex.
@@ -97,12 +98,13 @@ L2:
 
             // Here we do it the hard way.  Remember, eax contains the high word of CUSTOM_CRT_DVSR
 
-L3:
+            L3:
             mov     ebx,eax         // ebx:ecx <- divisor
             mov     ecx,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR)
             mov     edx,CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVND) // edx:eax <- dividend
             mov     eax,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVND)
-L5:
+
+            L5:
             shr     ebx,1           // shift divisor right one bit
             rcr     ecx,1
             shr     edx,1           // shift dividend right one bit
@@ -133,16 +135,18 @@ L5:
             jb      short L7        // if result < original, we are ok
             cmp     eax,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVND) // hi words are equal, compare lo words
             jbe     short L7        // if less or equal we are ok, else subtract
-L6:
+
+            L6:
             dec     esi             // subtract 1 from quotient
-L7:
+
+            L7:
             xor     edx,edx         // edx:eax <- quotient
             mov     eax,esi
 
             // Just the cleanup left to do.  edx:eax contains the quotient.  Set the sign
             // according to the save value, cleanup the stack, and return.
 
-L4:
+            L4:
             dec     edi             // check to see if result is negative
             jnz     short L8        // if EDI == 0, result should be negative
             neg     edx             // otherwise, negate the result
@@ -151,7 +155,7 @@ L4:
 
             // Restore the saved registers and return.
 
-L8:
+            L8:
             pop     ebx
             pop     esi
             pop     edi
@@ -190,7 +194,7 @@ L8:
 
             ret     16              // callee restores the stack
 
-hard:
+            hard:
             push    ebx
 
             // must redefine A and B since esp has been altered
@@ -263,7 +267,8 @@ hard:
             sbb     eax,0
             mov     CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVND),eax // save positive value
             mov     CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVND),edx
-L1:
+
+            L1:
             mov     eax,CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR) // hi word of b
             or      eax,eax         // test to see if signed
             jge     short L2        // skip rest if b is already positive
@@ -273,8 +278,8 @@ L1:
             sbb     eax,0
             mov     CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR),eax // save positive value
             mov     CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR),edx
-L2:
 
+            L2:
             // Now do the divide.  First look to see if the divisor is less than 4194304K.
             // If so, then we can use a simple algorithm with word divides, otherwise
             // things get a little more complex.
@@ -299,12 +304,13 @@ L2:
             // Here we do it the hard way.  Remember, eax contains the high word of CUSTOM_CRT_DVSR
             //
 
-L3:
+            L3:
             mov     ebx,eax         // ebx:ecx <- divisor
             mov     ecx,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR)
             mov     edx,CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVND) // edx:eax <- dividend
             mov     eax,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVND)
-L5:
+
+            L5:
             shr     ebx,1           // shift divisor right one bit
             rcr     ecx,1
             shr     edx,1           // shift dividend right one bit
@@ -338,11 +344,12 @@ L5:
             jb      short L7        // if result < original, we are ok
             cmp     eax,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVND) // hi words are equal, compare lo words
             jbe     short L7        // if less or equal we are ok, else subtract
-L6:
+
+            L6:
             sub     eax,CUSTOM_CRT_LOWORD(CUSTOM_CRT_DVSR) // subtract divisor from result
             sbb     edx,CUSTOM_CRT_HIWORD(CUSTOM_CRT_DVSR)
-L7:
 
+            L7:
             //
             // Calculate remainder by subtracting the result from the original dividend.
             // Since the result is already in a register, we will do the subtract in the
@@ -361,7 +368,8 @@ L7:
 
             dec     edi             // check result sign flag
             jns     short L8        // result is ok, restore stack and return
-L4:
+
+            L4:
             neg     edx             // otherwise, negate the result
             neg     eax
             sbb     edx,0
@@ -371,7 +379,7 @@ L4:
             // Restore the saved registers and return.
             //
 
-L8:
+            L8:
             pop     edi
             pop     ebx
 
@@ -383,7 +391,53 @@ L8:
     }
 
     __declspec(naked) void _allshl() {
+        __asm {
+            // ***
+            // llshl - long shift left
+            //
+            // Purpose:
+            //        Does a Long Shift Left (signed and unsigned are identical)
+            //        Shifts a long left any number of bits.
+            //
+            // Entry:
+            //        EDX:EAX - long value to be shifted
+            //        CL    - number of bits to shift by
+            //
+            // Exit:
+            //        EDX:EAX - shifted value
+            //
+            // Uses:
+            //        CL is destroyed.
+            //
+            // Exceptions:
+            //
+            // *******************************************************************************
 
+            //  Handle shifts of 64 or more bits (all get 0)
+            cmp     cl, 64
+            jae     short RETZERO
+
+            //  Handle shifts of between 0 and 31 bits
+            cmp     cl, 32
+            jae     short MORE32
+            shld    edx,eax,cl
+            shl     eax,cl
+            ret
+
+            //  Handle shifts of between 32 and 63 bits
+            MORE32:
+            mov     edx,eax
+            xor     eax,eax
+            and     cl,31
+            shl     edx,cl
+            ret
+
+            //  return 0 in edx:eax
+            RETZERO:
+            xor     eax,eax
+            xor     edx,edx
+            ret
+        }
     }
 
     __declspec(naked) void _allshr() {
