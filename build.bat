@@ -1,5 +1,6 @@
 @echo off
 
+rem ARCH should be either x86 or x64. If the first parameter to batch script is not specified, then it is x64 by default.
 set ARCH=%1
 set ARCH_COMPILER_OPTION=
 if "%ARCH%"=="" set ARCH=x64
@@ -15,11 +16,12 @@ set DISABLE_SOME_WARNINGS=-wd4505 -wd4702 -wd4100 -wd4267 -wd4244
 set COMPILER_OPTIONS=%DEFINES%               ^
                      -nologo                 ^
                      /GR-                    ^
-					 -EHa-                   ^
-					 -Oi                     ^
-					 -W4                     ^
-					 /std:c++20              ^
-					 %DISABLE_SOME_WARNINGS%
+                     -EHa-                   ^
+                     -Oi                     ^
+                     -O2                     ^
+                     -W4                     ^
+                     /std:c++20              ^
+                     %DISABLE_SOME_WARNINGS%
 
 rem Stack Guards (security cookies) disabled
 rem Stack Probes disabled by forcing their inclusion only when function's local variables require more than 9999999 bytes.
@@ -30,3 +32,6 @@ set SPECIAL_LINKER_OPTIONS=-stack:0x100000,0x100000
 set LIBRARIES=kernel32.lib
 
 cl main.cpp %COMPILER_OPTIONS% %SPECIAL_COMPILER_OPTIONS% -link -nodefaultlib -subsystem:windows %LIBRARIES% %SPECIAL_LINKER_OPTIONS%
+
+rem This generates assembly interleaved with the source code (main.cod file).
+rem cl main.cpp %COMPILER_OPTIONS% %SPECIAL_COMPILER_OPTIONS% /FAcs -link -nodefaultlib -subsystem:windows %LIBRARIES% %SPECIAL_LINKER_OPTIONS%

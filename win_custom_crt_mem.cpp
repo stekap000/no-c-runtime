@@ -1,4 +1,8 @@
 extern "C" {
+    // These are definitions for memset and memcpy that are not intrinsic.
+    // Also, these implementations are not efficient.
+    // Alternative definition would use winapi ZeroMemory, or directly SIMD.
+
     #pragma function(memset)
     void* memset(void* destination, int byte_value, size_t byte_count) {
         char* dest = (char*)destination;
