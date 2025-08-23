@@ -1,6 +1,13 @@
 @echo off
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
+set ARCH=%1
+set ARCH_COMPILER_OPTION=
+if "%ARCH%"=="" set ARCH=x64
+if %ARCH%==x86  set ARCH_COMPILER_OPTION=/arch:IA32
+
+echo %ARCH%
+
+call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
 
 set DEFINES=/DATTACH_CONSOLE /DDEBUG_MODE /D_HAS_EXCEPTIONS=0 /D_CRT_SECURE_NO_WARNINGS
 set DISABLE_SOME_WARNINGS=-wd4505 -wd4702 -wd4100 -wd4267 -wd4244
@@ -16,7 +23,7 @@ set COMPILER_OPTIONS=%DEFINES%               ^
 
 rem Stack Guards (security cookies) disabled
 rem Stack Probes disabled by forcing their inclusion only when function's local variables require more than 9999999 bytes.
-set SPECIAL_COMPILER_OPTIONS=/GS- /Gs9999999
+set SPECIAL_COMPILER_OPTIONS=/GS- /Gs9999999 %ARCH_COMPILER_OPTION%
 rem Stack immediatelly reserved and commited (1MB).
 set SPECIAL_LINKER_OPTIONS=-stack:0x100000,0x100000
 
