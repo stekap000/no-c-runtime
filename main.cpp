@@ -31,10 +31,6 @@ void print(String s) {
     WriteConsole(std_out, s.data, s.size, &count, NULL);
 }
 
-struct BigArray {
-    int x[123200];
-};
-
 void __stdcall WinMainCRTStartup() {
     AttachConsole(ATTACH_PARENT_PROCESS);
     std_out = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -45,14 +41,7 @@ void __stdcall WinMainCRTStartup() {
 
     print(StringLiteral("Printing for debug works"));
 
-    BigArray test = {0};
-    test.x[12] = 3;
 
-    for(int i = 0; i < 12345; ++i) {
-        String x = StringLiteral("...4...");
-        x.data[3] = test.x[i] + '0';
-        print(x);
-    }
 
     ExitProcess(0);
 }
